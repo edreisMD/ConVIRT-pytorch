@@ -1,0 +1,24 @@
+batch_size: 18
+epochs: 80
+eval_every_n_epochs: 1
+fine_tune_from: None
+log_every_n_steps: 2
+weight_decay: 10e-6
+fp16_precision: False
+
+
+model:
+  out_dim: 768
+  base_model: "resnet50"
+
+dataset:
+  s: 1
+  input_shape: (512,512,3)
+  num_workers: 3
+  valid_size: 0.05
+
+loss:
+  temperature: 0.5
+  use_cosine_similarity: True
+  alpha_weight: 0.5
+  

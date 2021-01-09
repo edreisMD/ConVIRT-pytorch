@@ -1,0 +1,16 @@
+# PyTorch ConVIRT
+
+## Contrastive Learning of Medical Visual Representations from Paired Images and Text
+by Yuhao Zhang, Hang Jiang, Yasuhide Miura, Christopher D. Manning, Curtis P. Langlotz
+
+Non-official open source release prepared by Eduardo Reis.
+
+Note: This repository was forked and modified from https://github.com/sthalles/SimCLR.
+
+References: 
+- Yuhao Zhang et al. Contrastive Learning of Medical Visual Representations from Paired Images and Text. https://arxiv.org/pdf/2010.00747.pdf
+- Ting Chen et al. A Simple Framework for Contrastive Learning of Visual Representations
+- https://github.com/sthalles/SimCLR
+- https://github.com/google-research/simclr
+- https://github.com/google-research/bert
+- https://github.com/hanxiao/bert-as-service#q-what-are-the-available-pooling-strategies
