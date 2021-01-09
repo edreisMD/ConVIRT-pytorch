@@ -23,7 +23,7 @@ warnings.filterwarnings("ignore")
 class ClrDataset(Dataset):
     """Contrastive Learning Representations Dataset."""
 
-    def __init__(self, csv_file, img_root_dir, emb_root_dir, transform=None):
+    def __init__(self, csv_file, img_root_dir, emb_root_dir, input_shape, transform=None):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -35,6 +35,7 @@ class ClrDataset(Dataset):
         self.img_root_dir = img_root_dir
         self.emb_root_dir = emb_root_dir
         self.transform = transform
+        self.input_shape = input_shape
 
     def __len__(self):
         return len(self.clr_frame)
@@ -46,8 +47,9 @@ class ClrDataset(Dataset):
         img_name = os.path.join(self.img_root_dir,
                                 self.clr_frame.iloc[idx, 0])
         image = Image.open(img_name)
-        image = image.resize((512, 512), Image.ANTIALIAS)
-        image = image.convert('RGB')
+        image = image.resize((self.input_shape[0], self.input_shape[1]), Image.ANTIALIAS)
+        if self.input_shape[2] == 3:
+            image = image.convert('RGB')
         
         laudo = self.clr_frame.iloc[idx, 4]
         laudo = laudo.replace("\n", "")

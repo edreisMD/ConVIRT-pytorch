@@ -26,7 +26,8 @@ class DataSetWrapper(object):
         train_dataset = ClrDataset(csv_file='../data/creating_dataset/clr_dataset.csv',
                                            img_root_dir='../../MISTI/25k_corretos/Anonymized/images/',
                                            emb_root_dir='../data/creating_dataset/embed_folder/',
-                                           transform=SimCLRDataTransform(data_augment)
+                                           transform=SimCLRDataTransform(data_augment),
+                                           input_shape = self.input_shape
                                            )
 
         # train_dataset = datasets.STL10('./data', split='train+unlabeled', download=True,

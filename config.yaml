@@ -13,14 +13,14 @@ model_res:
 
 model_bert:
   out_dim: 512
-  base_model: "emilyalsentzer/Bio_ClinicalBERT" #options:bert-base-uncased neuralmind/bert-base-portuguese-cased 
+  base_model: "neuralmind/bert-base-portuguese-cased" #"emilyalsentzer/Bio_ClinicalBERT" "bert-base-uncased" "neuralmind/bert-base-portuguese-cased" 
   freeze_layers: [0,1,2,3,4,5,11]
-  do_lower_case: True
+  do_lower_case: False
   truncation: False
 
 dataset:
   s: 1
-  input_shape: (512,512,3)
+  input_shape: (300,300,3)
   num_workers: 3
   valid_size: 0.05
 
