@@ -50,7 +50,8 @@ class ClrDataset(Dataset):
         image = image.convert('RGB')
         
         laudo = self.clr_frame.iloc[idx, 4]
-        ls_laudo = laudo.split('.')
+        laudo = laudo.replace("\n", "")
+        ls_laudo = laudo.split(".")
         phrase = random.choice(ls_laudo)
         
         sample = {'image': image, 'phrase': phrase}

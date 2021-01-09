@@ -21,16 +21,19 @@ from transformers import BertTokenizer, BertModel, BertConfig, BertForPreTrainin
 # Create the BertClassfier class
 class BERTSimCLR(nn.Module):
 
-    def __init__(self, base_model = 'bert-base-uncased', out_dim = 512, freeze_layers = [0,1,2,3,4,5,11]):
+    def __init__(self, base_model, out_dim, freeze_layers, do_lower_case, truncation):
         super(BERTSimCLR, self).__init__()
         self.base_model = str(base_model)
         self.freeze_layers = freeze_layers
-        self.bert_model = self._get_basemodel(base_model)
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        self.bert_model = self._get_basemodel()
+        # self.tokenizer = BertTokenizer.from_pretrained(base_model)
 
-    def _get_basemodel(self, model_name):
+        # projection MLP
+        self.l1 = nn.Linear(768, 768) #768 is the size of the BERT embbedings
+        self.l2 = nn.Linear(768, out_dim) #768 is the size of the BERT embbedings
+
+    def _get_basemodel(self):
         try:
-            print(self.base_model)
             model = BertModel.from_pretrained(self.base_model)# return_dict=True)
 
             if self.freeze_layers is not None:
@@ -38,18 +41,17 @@ class BERTSimCLR(nn.Module):
                     for param in list(model.encoder.layer[layer_idx].parameters()):
                         param.requires_grad = False
 
-            print("Image feature extractor:", model_name)
+            print("Image feature extractor:", self.base_model)
             return model
         except:
             raise ("Invalid model name. Check the config file and pass a BERT model from transformers lybrary")
 
         
-    def forward(self, x):
+    def forward(self, encoded_inputs):
         """
         Obter os inputs e em seguida extrair os hidden layers e fazer a media de todos os tokens
         Fonte: https://github.com/BramVanroy/bert-for-inference/blob/master/introduction-to-bert.ipynb
         """
-        encoded_inputs = x
         outputs = self.bert_model(**encoded_inputs)
 
         # Max-Pooling para extrair as embeddings como no paper e no https://huggingface.co/sentence-transformers/bert-base-nli-max-tokens
@@ -61,5 +63,9 @@ class BERTSimCLR(nn.Module):
 
         # Mean over all layers - Option to be tested
         # sentence_embeddings = torch.mean(hidden_states[-1], dim=1).squeeze()
-        
-        return max_over_time
+
+        x = self.l1(max_over_time)
+        x = F.relu(x)
+        x = self.l2(x)
+
+        return x

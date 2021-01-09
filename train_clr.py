@@ -42,8 +42,8 @@ class SimCLR(object):
         self.writer = SummaryWriter()
         self.dataset = dataset
         self.nt_xent_criterion = NTXentLoss(self.device, config['batch_size'], **config['loss'])
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-
+        self.truncation = config['model_bert']['truncation']
+        self.tokenizer = BertTokenizer.from_pretrained(config['model_bert']['base_model'], do_lower_case=config['model_bert']['do_lower_case'])
 
     def _get_device(self):
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -71,10 +71,12 @@ class SimCLR(object):
         train_loader, valid_loader = self.dataset.get_data_loaders()
 
         #Model Resnet Initialize
-        model_res = ResNetSimCLR(**self.config["model"]).to(self.device)
-        model_res = self._load_pre_trained_weights(model_res)
+        model_res = ResNetSimCLR(**self.config["model_res"]).to(self.device)
+        model_res = self._load_pre_trained_weights(model_res, 'res')
 
-        optimizer_res = torch.optim.Adam(model_res.parameters(), 3e-4, weight_decay=eval(self.config['weight_decay']))
+        optimizer_res = torch.optim.Adam(model_res.parameters(), 
+                                        eval(self.config['learning_rate']), 
+                                        weight_decay=eval(self.config['weight_decay']))
 
         scheduler_res = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_res, T_max=len(train_loader), eta_min=0,
                                                                last_epoch=-1)
@@ -85,12 +87,12 @@ class SimCLR(object):
                                               keep_batchnorm_fp32=True)
 
         #Model BERT Initialize
-        model_bert = BERTSimCLR()
-        model_bert.to(self.device)
+        model_bert = BERTSimCLR(**self.config["model_bert"]).to(self.device)
+        model_bert = self._load_pre_trained_weights(model_bert, 'bert')
 
         optimizer_bert = AdamW(model_bert.parameters(),
-                      lr=5e-5,    # Default learning rate
-                      eps=1e-8    # Default epsilon value
+                      eval(self.config['learning_rate']),    # Default learning rate
+                      weight_decay=eval(self.config['weight_decay'])    # Default epsilon value
                       )
 
         scheduler_bert = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_bert, T_max=len(train_loader), eta_min=0,
@@ -119,7 +121,7 @@ class SimCLR(object):
                 optimizer_res.zero_grad()
                 optimizer_bert.zero_grad()
 
-                xls = self.tokenizer(xls, return_tensors="pt", padding=True, truncation=True)
+                xls = self.tokenizer(xls, return_tensors="pt", padding=True, truncation=self.truncation)
 
                 xis = xis.to(self.device)
                 xls = xls.to(self.device)
@@ -157,10 +159,10 @@ class SimCLR(object):
             self.writer.add_scalar('cosine_lr_decay_res', scheduler_res.get_lr()[0], global_step=n_iter)
             self.writer.add_scalar('cosine_lr_decay_bert', scheduler_bert.get_lr()[0], global_step=n_iter)
 
-    def _load_pre_trained_weights(self, model):
+    def _load_pre_trained_weights(self, model, which_model):
         try:
             checkpoints_folder = os.path.join('./runs', self.config['fine_tune_from'], 'checkpoints')
-            state_dict = torch.load(os.path.join(checkpoints_folder, 'model.pth'))
+            state_dict = torch.load(os.path.join(checkpoints_folder, 'model_'+which_model+'.pth'))
             model.load_state_dict(state_dict)
             print("Loaded pre-trained model with success.")
         except FileNotFoundError:

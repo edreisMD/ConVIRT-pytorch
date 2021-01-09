@@ -3,13 +3,20 @@ epochs: 80
 eval_every_n_epochs: 1
 fine_tune_from: None
 log_every_n_steps: 2
-weight_decay: 10e-6
+learning_rate: 1e-4
+weight_decay: 1e-6
 fp16_precision: False
 
-
-model:
-  out_dim: 768
+model_res:
+  out_dim: 512
   base_model: "resnet50"
+
+model_bert:
+  out_dim: 512
+  base_model: "emilyalsentzer/Bio_ClinicalBERT" #options:bert-base-uncased neuralmind/bert-base-portuguese-cased 
+  freeze_layers: [0,1,2,3,4,5,11]
+  do_lower_case: True
+  truncation: False
 
 dataset:
   s: 1
