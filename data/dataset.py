@@ -23,7 +23,7 @@ warnings.filterwarnings("ignore")
 class ClrDataset(Dataset):
     """Contrastive Learning Representations Dataset."""
 
-    def __init__(self, csv_file, img_root_dir, emb_root_dir, input_shape, transform=None):
+    def __init__(self, csv_file, img_root_dir, input_shape, transform=None):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -33,7 +33,6 @@ class ClrDataset(Dataset):
         """
         self.clr_frame = pd.read_csv(csv_file)
         self.img_root_dir = img_root_dir
-        self.emb_root_dir = emb_root_dir
         self.transform = transform
         self.input_shape = input_shape
 

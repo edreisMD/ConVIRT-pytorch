@@ -20,12 +20,13 @@ class DataSetWrapper(object):
         self.s = s
         self.input_shape = eval(input_shape)
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-
+        self.csv_file = csv_file
+        self.img_root_dir = img_root_dir
+        
     def get_data_loaders(self):
         data_augment = self._get_simclr_pipeline_transform()
-        train_dataset = ClrDataset(csv_file='../data/creating_dataset/clr_dataset.csv',
-                                           img_root_dir='../../MISTI/25k_corretos/Anonymized/images/',
-                                           emb_root_dir='../data/creating_dataset/embed_folder/',
+        train_dataset = ClrDataset(csv_file=self.csv_file,
+                                           img_root_dir=self.img_root_dir,
                                            transform=SimCLRDataTransform(data_augment),
                                            input_shape = self.input_shape
                                            )
