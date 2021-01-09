@@ -181,7 +181,7 @@ class SimCLR(object):
             print(f'Validation step')
             for xis, xls in tqdm(valid_loader):
 
-                xls = self.tokenizer(xls, return_tensors="pt", padding=True, truncation=True)
+                xls = self.tokenizer(xls, return_tensors="pt", padding=True, truncation=self.truncation)
 
                 xis = xis.to(self.device)
                 xls = xls.to(self.device)

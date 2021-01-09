@@ -13,7 +13,7 @@ np.random.seed(0)
 
 class DataSetWrapper(object):
 
-    def __init__(self, batch_size, num_workers, valid_size, input_shape, s):
+    def __init__(self, batch_size, num_workers, valid_size, input_shape, s, csv_file, img_root_dir):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.valid_size = valid_size
