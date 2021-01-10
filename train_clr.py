@@ -11,6 +11,8 @@ from tqdm import tqdm
 from transformers import AdamW
 import ast
 from transformers import BertTokenizer, AutoTokenizer
+import logging
+logging.getLogger("transformers.tokenization_utils_base").setLevel(logging.ERROR)
 
 import sys, os
 
@@ -79,11 +81,11 @@ class SimCLR(object):
                                         eval(self.config['learning_rate']), 
                                         weight_decay=eval(self.config['weight_decay']))
 
-        # scheduler_res = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_res, T_max=len(train_loader), eta_min=0,
-        #                                                        last_epoch=-1)
+        scheduler_res = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_res, T_max=len(train_loader), eta_min=0,
+                                                               last_epoch=-1)
 
-        scheduler_res = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_res, 'min', factor=0.5,
-                                                                    patience=5)
+        # scheduler_res = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_res, 'min', factor=0.5,
+        #                                                             patience=5)
 
 
         if apex_support and self.config['fp16_precision']:
@@ -100,11 +102,11 @@ class SimCLR(object):
                       weight_decay=eval(self.config['weight_decay'])    # Default epsilon value
                       )
 
-        # scheduler_bert = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_bert, T_max=len(train_loader), eta_min=0,
-        #                                                             last_epoch=-1)
+        scheduler_bert = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_bert, T_max=len(train_loader), eta_min=0,
+                                                                    last_epoch=-1)
 
-        scheduler_res = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_bert, 'min', factor=0.5,
-                                                                    patience=5)
+        # scheduler_res = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_bert, 'min', factor=0.5,
+        #                                                             patience=5)
 
         if apex_support and self.config['fp16_precision']:
             model_bert, optimizer_bert = amp.initialize(model_bert, optimizer_bert,
@@ -125,7 +127,7 @@ class SimCLR(object):
 
         for epoch_counter in range(self.config['epochs']):
             print(f'Epoch {epoch_counter}')
-            for xis, xls in train_loader:
+            for xis, xls in tqdm(train_loader):
 
                 optimizer_res.zero_grad()
                 optimizer_bert.zero_grad()
@@ -168,10 +170,6 @@ class SimCLR(object):
             self.writer.add_scalar('cosine_lr_decay_res', scheduler_res.get_lr()[0], global_step=n_iter)
             self.writer.add_scalar('cosine_lr_decay_bert', scheduler_bert.get_lr()[0], global_step=n_iter)
 
-            #Clear Terminal
-            if apex_support:
-                os.system('clear')
-
     def _load_pre_trained_weights(self, model, which_model):
         try:
             checkpoints_folder = os.path.join('./runs', self.config['fine_tune_from'], 'checkpoints')
@@ -192,7 +190,7 @@ class SimCLR(object):
             valid_loss = 0.0
             counter = 0
             print(f'Validation step')
-            for xis, xls in valid_loader:
+            for xis, xls in tqdm(valid_loader):
 
                 xls = self.tokenizer(list(xls), return_tensors="pt", padding=True, truncation=self.truncation)
 
