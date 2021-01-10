@@ -73,7 +73,7 @@ class BERTSimCLR(nn.Module):
         attention_mask = encoded_inputs['attention_mask']
         token_embeddings = outputs[0] #First element of model_output contains all token embeddings
         input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-        token_embeddings[input_mask_expanded == 0] = -1e9  # Set padding tokens to large negative value
+        # token_embeddings[input_mask_expanded == 0] = -1e9  # Set padding tokens to large negative value
         max_over_time = torch.max(token_embeddings, 1)[0]
 
         # # Mean over all layers - Option to be tested

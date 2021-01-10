@@ -1,11 +1,11 @@
-batch_size: 42
+batch_size: 86
 epochs: 1000
 eval_every_n_epochs: 5
 fine_tune_from: 'Jan09_21-24-28_edu-GPU-Linux'
 log_every_n_steps: 2
 learning_rate: 3e-4
 weight_decay: 1e-6
-fp16_precision: False
+fp16_precision: True
 
 model_res:
   out_dim: 512

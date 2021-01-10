@@ -12,6 +12,7 @@ from transformers import AdamW
 import ast
 from transformers import BertTokenizer, AutoTokenizer
 
+import sys, os
 
 apex_support = False
 try:
@@ -121,14 +122,15 @@ class SimCLR(object):
         best_valid_loss = np.inf
 
         print(f'Training...')
+
         for epoch_counter in range(self.config['epochs']):
             print(f'Epoch {epoch_counter}')
-            for xis, xls in tqdm(train_loader):
+            for xis, xls in train_loader:
 
                 optimizer_res.zero_grad()
                 optimizer_bert.zero_grad()
 
-                xls = self.tokenizer(xls, return_tensors="pt", padding=True, truncation=self.truncation)
+                xls = self.tokenizer(list(xls), return_tensors="pt", padding=True, truncation=self.truncation)
 
                 xis = xis.to(self.device)
                 xls = xls.to(self.device)
@@ -147,7 +149,7 @@ class SimCLR(object):
                 optimizer_res.step()
                 optimizer_bert.step()
                 n_iter += 1
-
+                
             # validate the model if requested
             if epoch_counter % self.config['eval_every_n_epochs'] == 0:
                 valid_loss = self._validate(model_res, model_bert, valid_loader, n_iter)
@@ -165,6 +167,10 @@ class SimCLR(object):
                 scheduler_bert.step()
             self.writer.add_scalar('cosine_lr_decay_res', scheduler_res.get_lr()[0], global_step=n_iter)
             self.writer.add_scalar('cosine_lr_decay_bert', scheduler_bert.get_lr()[0], global_step=n_iter)
+
+            #Clear Terminal
+            if apex_support:
+                os.system('clear')
 
     def _load_pre_trained_weights(self, model, which_model):
         try:
@@ -186,9 +192,9 @@ class SimCLR(object):
             valid_loss = 0.0
             counter = 0
             print(f'Validation step')
-            for xis, xls in tqdm(valid_loader):
+            for xis, xls in valid_loader:
 
-                xls = self.tokenizer(xls, return_tensors="pt", padding=True, truncation=self.truncation)
+                xls = self.tokenizer(list(xls), return_tensors="pt", padding=True, truncation=self.truncation)
 
                 xis = xis.to(self.device)
                 xls = xls.to(self.device)
