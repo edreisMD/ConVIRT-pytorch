@@ -51,9 +51,11 @@ class NTXentLoss(torch.nn.Module):
 
     def forward(self, zis, zjs,
                     norm=True,
-                    temperature=0.1,
-                    weights=1.0,
-                    alpha=0.75):
+                    weights=1.0):
+                    
+        temperature = self.temperature
+        alpha = self.alpha_weight
+
         LARGE_NUM = 1e9
         """Compute loss for model.
         Args:
@@ -97,7 +99,7 @@ class NTXentLoss(torch.nn.Module):
         # print(loss_b)
 
         # loss = alpha*loss_a + (1-alpha)*loss_b
-        loss = alpha*2*loss_a + (1-alpha)*2*loss_b
+        loss = alpha*loss_a + (1-alpha)*loss_b
         # print(loss)
     
         return loss

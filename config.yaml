@@ -1,9 +1,9 @@
-batch_size: 18
+batch_size: 32
 epochs: 80
-eval_every_n_epochs: 1
+eval_every_n_epochs: 3
 fine_tune_from: None
 log_every_n_steps: 2
-learning_rate: 1e-4
+learning_rate: 3e-4
 weight_decay: 1e-6
 fp16_precision: False
 
@@ -13,8 +13,8 @@ model_res:
 
 model_bert:
   out_dim: 512
-  base_model: "neuralmind/bert-base-portuguese-cased" #"emilyalsentzer/Bio_ClinicalBERT" "bert-base-uncased" "neuralmind/bert-base-portuguese-cased" 
-  freeze_layers: [0,1,2,3,4,5,11]
+  base_model: 'emilyalsentzer/Bio_ClinicalBERT'
+  freeze_layers: [0,1,2,3,4,5,6]
   do_lower_case: False
   truncation: False
 
@@ -22,12 +22,22 @@ dataset:
   s: 1
   input_shape: (300,300,3)
   num_workers: 4
-  valid_size: 0.05
+  valid_size: 0.1
   csv_file: '../data/creating_dataset/clr_dataset.csv'
   img_root_dir: '../../../SSD/cont_learning_data/images'
 
 loss:
-  temperature: 0.5
+  temperature: 0.1
   use_cosine_similarity: True
-  alpha_weight: 0.5
-  
+  alpha_weight: 0.75
+
+### BERT Models
+
+# emilyalsentzer/Bio_ClinicalBERT A melhor!!!
+# bert-base-uncased
+# neuralmind/bert-base-portuguese-cased
+# distilbert-base-nli-mean-tokens
+# distilbert-base-multilingual-cased
+# distiluse-base-multilingual-cased-v2
+# sentence-transformers/distilbert-base-nli-stsb-mean-tokens
+# sentence-transformers/xlm-r-100langs-bert-base-nli-stsb-mean-tokens funcionou bem

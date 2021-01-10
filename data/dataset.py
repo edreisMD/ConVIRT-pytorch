@@ -46,7 +46,7 @@ class ClrDataset(Dataset):
         img_name = os.path.join(self.img_root_dir,
                                 self.clr_frame.iloc[idx, 0])
         image = Image.open(img_name)
-        image = image.resize((self.input_shape[0], self.input_shape[1]), Image.ANTIALIAS)
+        # image = image.resize((self.input_shape[0], self.input_shape[1]), Image.ANTIALIAS)
         if self.input_shape[2] == 3:
             image = image.convert('RGB')
         
