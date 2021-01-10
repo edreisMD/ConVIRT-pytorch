@@ -128,7 +128,7 @@ class SimCLR(object):
 
         for epoch_counter in range(self.config['epochs']):
             print(f'Epoch {epoch_counter}')
-            for xis, xls in tqdm(train_loader):
+            for xis, xls in train_loader:
 
                 optimizer_res.zero_grad()
                 optimizer_bert.zero_grad()
@@ -191,7 +191,7 @@ class SimCLR(object):
             valid_loss = 0.0
             counter = 0
             print(f'Validation step')
-            for xis, xls in tqdm(valid_loader):
+            for xis, xls in valid_loader:
 
                 xls = self.tokenizer(list(xls), return_tensors="pt", padding=True, truncation=self.truncation)
 
