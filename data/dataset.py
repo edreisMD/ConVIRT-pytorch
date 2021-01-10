@@ -8,11 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 from PIL import Image
 import random
-from sentence_transformers import SentenceTransformer, util
-import pickle
 import os
-import time
-
 
 # Ignore warnings
 import warnings
