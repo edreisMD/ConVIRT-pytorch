@@ -5,8 +5,6 @@ import torchvision.transforms as transforms
 from data.gaussian_blur import GaussianBlur
 from torchvision import datasets
 from .dataset import ClrDataset
-from transformers import BertTokenizer
-
 
 np.random.seed(0)
 
@@ -19,7 +17,6 @@ class DataSetWrapper(object):
         self.valid_size = valid_size
         self.s = s
         self.input_shape = eval(input_shape)
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         self.csv_file = csv_file
         self.img_root_dir = img_root_dir
         

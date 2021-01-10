@@ -23,8 +23,8 @@ dataset:
   input_shape: (300,300,3)
   num_workers: 4
   valid_size: 0.1
-  csv_file: '../data/creating_dataset/clr_dataset.csv'
-  img_root_dir: '../../../SSD/cont_learning_data/images'
+  csv_file: '../data/creating_dataset/clr_dataset.csv' # Add the MIMIC-CXR path here 
+  img_root_dir: '../../../SSD/cont_learning_data/images' # 
 
 loss:
   temperature: 0.1
