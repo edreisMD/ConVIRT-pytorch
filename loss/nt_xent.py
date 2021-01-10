@@ -1,6 +1,5 @@
 import torch
 import numpy as np
-from pytorch_metric_learning import losses
 import torch.nn.functional as F
 
 class NTXentLoss(torch.nn.Module):
@@ -52,7 +51,7 @@ class NTXentLoss(torch.nn.Module):
     def forward(self, zis, zjs,
                     norm=True,
                     weights=1.0):
-                    
+
         temperature = self.temperature
         alpha = self.alpha_weight
 

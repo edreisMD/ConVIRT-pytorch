@@ -78,8 +78,12 @@ class SimCLR(object):
                                         eval(self.config['learning_rate']), 
                                         weight_decay=eval(self.config['weight_decay']))
 
-        scheduler_res = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_res, T_max=len(train_loader), eta_min=0,
-                                                               last_epoch=-1)
+        # scheduler_res = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_res, T_max=len(train_loader), eta_min=0,
+        #                                                        last_epoch=-1)
+
+        scheduler_res = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_res, 'min', factor=0.5,
+                                                                    patience=5)
+
 
         if apex_support and self.config['fp16_precision']:
             model_res, optimizer = amp.initialize(model_res, optimizer_res,
@@ -95,8 +99,11 @@ class SimCLR(object):
                       weight_decay=eval(self.config['weight_decay'])    # Default epsilon value
                       )
 
-        scheduler_bert = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_bert, T_max=len(train_loader), eta_min=0,
-                                                               last_epoch=-1)
+        # scheduler_bert = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_bert, T_max=len(train_loader), eta_min=0,
+        #                                                             last_epoch=-1)
+
+        scheduler_res = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_bert, 'min', factor=0.5,
+                                                                    patience=5)
 
         if apex_support and self.config['fp16_precision']:
             model_bert, optimizer_bert = amp.initialize(model_bert, optimizer_bert,

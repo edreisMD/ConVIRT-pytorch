@@ -1,7 +1,7 @@
-batch_size: 32
-epochs: 80
-eval_every_n_epochs: 3
-fine_tune_from: None
+batch_size: 42
+epochs: 1000
+eval_every_n_epochs: 5
+fine_tune_from: 'Jan09_21-24-28_edu-GPU-Linux'
 log_every_n_steps: 2
 learning_rate: 3e-4
 weight_decay: 1e-6
