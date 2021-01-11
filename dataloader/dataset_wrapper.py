@@ -2,7 +2,7 @@ import numpy as np
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 import torchvision.transforms as transforms
-from data.gaussian_blur import GaussianBlur
+from dataloader.gaussian_blur import GaussianBlur
 from torchvision import datasets
 from .dataset import ClrDataset
 
