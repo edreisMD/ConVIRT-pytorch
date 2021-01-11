@@ -40,7 +40,7 @@ class DataSetWrapper(object):
         data_transforms = transforms.Compose([
                                               transforms.RandomResizedCrop(size=self.input_shape[0], scale=(0.8, 1.0)),
                                               transforms.RandomHorizontalFlip(),
-                                              transforms.RandomApply([color_jitter], p=0.8),
+                                            #   transforms.RandomApply([color_jitter], p=0.8),
                                               transforms.RandomGrayscale(p=0.2),
                                             #   GaussianBlur(kernel_size=int(0.1 * self.input_shape[0])),
                                               transforms.ToTensor(),
