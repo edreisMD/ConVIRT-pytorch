@@ -1,6 +1,6 @@
 import torch
-from models.resnet_clr import ResNetSimCLR
-from models.bert_clr import BERTSimCLR
+# from models.resnet_clr import ResNetSimCLR
+from models.model import ModelCLR
 from torch.utils.tensorboard import SummaryWriter
 import torch.nn.functional as F
 from loss.nt_xent import NTXentLoss
@@ -46,71 +46,35 @@ class SimCLR(object):
         self.writer = SummaryWriter()
         self.dataset = dataset
         self.nt_xent_criterion = NTXentLoss(self.device, config['batch_size'], **config['loss'])
-        self.truncation = config['model_bert']['truncation']
-        self.tokenizer = AutoTokenizer.from_pretrained(config['model_bert']['base_model'], do_lower_case=config['model_bert']['do_lower_case'])
+        self.truncation = config['truncation']
+        self.tokenizer = AutoTokenizer.from_pretrained(config['model']['bert_base_model'])#, do_lower_case=config['model_bert']['do_lower_case'])
 
     def _get_device(self):
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         print("Running on:", device)
         return device
 
-    def _step(self, model_res, model_bert, xis, xls, n_iter):
-
-        # get the representations and the projections
-        ris, zis = model_res(xis)  # [N,C]
-
-        # get the representations and the projections
-        zls = model_bert(xls)  # [N,C]
-        # zls = xls
-        # normalize projection feature vectors
-
-        loss = self.nt_xent_criterion(zis, zls)
-        return loss
-
-    def process_BERT_input():
-        return 
-
     def train(self):
         #Dataloaders
         train_loader, valid_loader = self.dataset.get_data_loaders()
 
         #Model Resnet Initialize
-        model_res = ResNetSimCLR(**self.config["model_res"]).to(self.device)
-        model_res = self._load_pre_trained_weights(model_res, 'res')
+        model = ModelCLR(**self.config["model"]).to(self.device)
+        model = self._load_pre_trained_weights(model)
 
-        optimizer_res = torch.optim.Adam(model_res.parameters(), 
+        optimizer = torch.optim.Adam(model.parameters(), 
                                         eval(self.config['learning_rate']), 
                                         weight_decay=eval(self.config['weight_decay']))
 
-        scheduler_res = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_res, T_max=len(train_loader), eta_min=0,
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0,
                                                                last_epoch=-1)
 
-        # scheduler_res = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_res, 'min', factor=0.5,
+        # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5,
         #                                                             patience=5)
 
 
         if apex_support and self.config['fp16_precision']:
-            model_res, optimizer = amp.initialize(model_res, optimizer_res,
-                                              opt_level='O2',
-                                              keep_batchnorm_fp32=True)
-
-        #Model BERT Initialize
-        model_bert = BERTSimCLR(**self.config["model_bert"]).to(self.device)
-        model_bert = self._load_pre_trained_weights(model_bert, 'bert')
-
-        optimizer_bert = AdamW(model_bert.parameters(),
-                      eval(self.config['learning_rate']),    # Default learning rate
-                      weight_decay=eval(self.config['weight_decay'])    # Default epsilon value
-                      )
-
-        scheduler_bert = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_bert, T_max=len(train_loader), eta_min=0,
-                                                                    last_epoch=-1)
-
-        # scheduler_res = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_bert, 'min', factor=0.5,
-        #                                                             patience=5)
-
-        if apex_support and self.config['fp16_precision']:
-            model_bert, optimizer_bert = amp.initialize(model_bert, optimizer_bert,
+            model, optimizer = amp.initialize(model, optimizer,
                                               opt_level='O2',
                                               keep_batchnorm_fp32=True)
 
@@ -128,17 +92,27 @@ class SimCLR(object):
 
         for epoch_counter in range(self.config['epochs']):
             print(f'Epoch {epoch_counter}')
-            for xis, xls in train_loader:
+            for xis, xls in tqdm(train_loader):
 
-                optimizer_res.zero_grad()
-                optimizer_bert.zero_grad()
+                optimizer.zero_grad()
+                # optimizer_bert.zero_grad()
 
                 xls = self.tokenizer(list(xls), return_tensors="pt", padding=True, truncation=self.truncation)
 
                 xis = xis.to(self.device)
                 xls = xls.to(self.device)
 
-                loss = self._step(model_res, model_bert, xis, xls, n_iter)
+                # get the representations and the projections
+                zis, zls = model(xis, xls)  # [N,C]
+
+                # get the representations and the projections
+                # zls = model_bert(xls)  # [N,C]
+                # zls = xls
+                # normalize projection feature vectors
+
+                loss = self.nt_xent_criterion(zis, zls)
+
+                # loss = self._step(model_res, model_bert, xis, xls, n_iter)
 
                 if n_iter % self.config['log_every_n_steps'] == 0:
                     self.writer.add_scalar('train_loss', loss, global_step=n_iter)
@@ -149,8 +123,8 @@ class SimCLR(object):
                 else:
                     loss.backward()
 
-                optimizer_res.step()
-                optimizer_bert.step()
+                optimizer.step()
+                # optimizer_bert.step()
                 n_iter += 1
                 
             # validate the model if requested
@@ -159,8 +133,8 @@ class SimCLR(object):
                 if valid_loss < best_valid_loss:
                     # save the model weights
                     best_valid_loss = valid_loss
-                    torch.save(model_res.state_dict(), os.path.join(model_checkpoints_folder, 'model_res.pth'))
-                    torch.save(model_bert.state_dict(), os.path.join(model_checkpoints_folder, 'model_bert.pth'))
+                    torch.save(model.state_dict(), os.path.join(model_checkpoints_folder, 'model.pth'))
+                    # torch.save(model_bert.state_dict(), os.path.join(model_checkpoints_folder, 'model_bert.pth'))
                 self.writer.add_scalar('validation_loss', valid_loss, global_step=valid_n_iter)
                 valid_n_iter += 1
 
@@ -168,13 +142,13 @@ class SimCLR(object):
             if epoch_counter >= 10:
                 scheduler_res.step()
                 scheduler_bert.step()
-            self.writer.add_scalar('cosine_lr_decay_res', scheduler_res.get_lr()[0], global_step=n_iter)
-            self.writer.add_scalar('cosine_lr_decay_bert', scheduler_bert.get_lr()[0], global_step=n_iter)
+            self.writer.add_scalar('cosine_lr_decay', scheduler.get_lr()[0], global_step=n_iter)
+            # self.writer.add_scalar('cosine_lr_decay_bert', scheduler_bert.get_lr()[0], global_step=n_iter)
 
-    def _load_pre_trained_weights(self, model, which_model):
+    def _load_pre_trained_weights(self, model):
         try:
             checkpoints_folder = os.path.join('./runs', self.config['fine_tune_from'], 'checkpoints')
-            state_dict = torch.load(os.path.join(checkpoints_folder, 'model_'+which_model+'.pth'))
+            state_dict = torch.load(os.path.join(checkpoints_folder, 'model.pth'))
             model.load_state_dict(state_dict)
             print("Loaded pre-trained model with success.")
         except FileNotFoundError:
@@ -186,8 +160,8 @@ class SimCLR(object):
 
         # validation steps
         with torch.no_grad():
-            model_res.eval()
-            model_bert.eval()
+            model.eval()
+            # model_bert.eval()
             valid_loss = 0.0
             counter = 0
             print(f'Validation step')
@@ -198,10 +172,19 @@ class SimCLR(object):
                 xis = xis.to(self.device)
                 xls = xls.to(self.device)
 
-                loss = self._step(model_res, model_bert, xis, xls, n_iter)
+                # get the representations and the projections
+                zis, zls = model(xis, xls)  # [N,C]
+
+                # get the representations and the projections
+                # zls = model_bert(xls)  # [N,C]
+                # zls = xls
+                # normalize projection feature vectors
+
+                loss = self.nt_xent_criterion(zis, zls)
+
                 valid_loss += loss.item()
                 counter += 1
             valid_loss /= counter
-        model_res.train()
-        model_bert.train()
+        model.train()
+        # model_bert.train()
         return valid_loss

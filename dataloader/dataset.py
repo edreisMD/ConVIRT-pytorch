@@ -9,6 +9,10 @@ from torchvision import transforms, utils
 from PIL import Image
 import random
 import os
+import pickle
+import random
+import ast
+
 
 # Ignore warnings
 import warnings
@@ -46,11 +50,16 @@ class ClrDataset(Dataset):
         if self.input_shape[2] == 3:
             image = image.convert('RGB')
         
-        laudo = self.clr_frame.iloc[idx, 4]
+
+        #chooosig a phrase
+        laudo = self.clr_frame.iloc[idx, 5]
+        # ls_laudo = ast.literal_eval(ls_laudo)
         laudo = laudo.replace("\n", "")
         ls_laudo = laudo.split(".")
+        if '' in ls_laudo:
+            ls_laudo.remove('')
         phrase = random.choice(ls_laudo)
-        
+
         sample = {'image': image, 'phrase': phrase}
 
         if self.transform:

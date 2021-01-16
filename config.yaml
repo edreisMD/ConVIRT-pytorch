@@ -1,23 +1,20 @@
-batch_size: 112
+batch_size: 72
 epochs: 1000
 eval_every_n_epochs: 5
-fine_tune_from: Jan10_10-37-22_edu-GPU-Linux
+fine_tune_from: None
 log_every_n_steps: 2
-learning_rate: 3e-4
+learning_rate: 1e-4
 weight_decay: 1e-6
 fp16_precision: True
+truncation: True
 
-model_res:
+model:
   out_dim: 512
-  base_model: "resnet50"
-
-model_bert:
-  out_dim: 512
-  base_model: 'emilyalsentzer/Bio_ClinicalBERT'
-  freeze_layers: [0,1,2,3,4,5,6]
+  res_base_model: "resnet50"
+  bert_base_model: 'sentence-transformers/paraphrase-xlm-r-multilingual-v1'
+  freeze_layers: [0,1,2,3,4,5]
   do_lower_case: False
-  truncation: False
-
+  
 dataset:
   s: 1
   input_shape: (300,300,3)
@@ -32,7 +29,6 @@ loss:
   alpha_weight: 0.75
 
 ### BERT Models
-
 # emilyalsentzer/Bio_ClinicalBERT A melhor!!!
 # bert-base-uncased
 # neuralmind/bert-base-portuguese-cased
@@ -41,3 +37,5 @@ loss:
 # distiluse-base-multilingual-cased-v2
 # sentence-transformers/distilbert-base-nli-stsb-mean-tokens
 # sentence-transformers/xlm-r-100langs-bert-base-nli-stsb-mean-tokens funcionou bem
+# cross-encoder/stsb-roberta-base
+# sentence-transformers/paraphrase-xlm-r-multilingual-v1

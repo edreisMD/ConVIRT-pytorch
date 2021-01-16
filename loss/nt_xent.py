@@ -68,7 +68,6 @@ class NTXentLoss(torch.nn.Module):
         The logits for contrastive prediction task.
         The labels for contrastive prediction task.
         """
-        print
         # Get (normalized) hidden1 and hidden2.
         if norm:
             zis = F.normalize(zis, p=2, dim=1)
@@ -91,10 +90,10 @@ class NTXentLoss(torch.nn.Module):
         logits_ba = torch.matmul(hidden2, torch.transpose(hidden1_large,0, 1)) / temperature
 
         loss_a = self.softXEnt(
-            labels, torch.cat([logits_ab], dim=1))
+            labels, logits_ab)
         # print(loss_a)
         loss_b = self.softXEnt(
-            labels, torch.cat([logits_ba], dim=1))
+            labels, logits_ba)
         # print(loss_b)
 
         # loss = alpha*loss_a + (1-alpha)*loss_b
