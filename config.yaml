@@ -1,6 +1,6 @@
 batch_size: 72
 epochs: 1000
-eval_every_n_epochs: 5
+eval_every_n_epochs: 1
 fine_tune_from: None
 log_every_n_steps: 2
 learning_rate: 1e-4
@@ -11,7 +11,7 @@ truncation: True
 model:
   out_dim: 512
   res_base_model: "resnet50"
-  bert_base_model: 'sentence-transformers/paraphrase-xlm-r-multilingual-v1'
+  bert_base_model: 'emilyalsentzer/Bio_ClinicalBERT' #'sentence-transformers/paraphrase-xlm-r-multilingual-v1'
   freeze_layers: [0,1,2,3,4,5]
   do_lower_case: False
   
@@ -38,4 +38,4 @@ loss:
 # sentence-transformers/distilbert-base-nli-stsb-mean-tokens
 # sentence-transformers/xlm-r-100langs-bert-base-nli-stsb-mean-tokens funcionou bem
 # cross-encoder/stsb-roberta-base
-# sentence-transformers/paraphrase-xlm-r-multilingual-v1
+# sentence-transformers/paraphrase-xlm-r-multilingual-v1 # Muito Boa!

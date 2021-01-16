@@ -129,7 +129,7 @@ class SimCLR(object):
                 
             # validate the model if requested
             if epoch_counter % self.config['eval_every_n_epochs'] == 0:
-                valid_loss = self._validate(model_res, model_bert, valid_loader, n_iter)
+                valid_loss = self._validate(model, valid_loader, n_iter)
                 if valid_loss < best_valid_loss:
                     # save the model weights
                     best_valid_loss = valid_loss
@@ -156,7 +156,7 @@ class SimCLR(object):
 
         return model
 
-    def _validate(self, model_res, model_bert, valid_loader, n_iter):
+    def _validate(self, model, valid_loader, n_iter):
 
         # validation steps
         with torch.no_grad():
