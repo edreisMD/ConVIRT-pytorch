@@ -140,10 +140,8 @@ class SimCLR(object):
 
             # warmup for the first 10 epochs
             if epoch_counter >= 10:
-                scheduler_res.step()
-                scheduler_bert.step()
+                scheduler.step()
             self.writer.add_scalar('cosine_lr_decay', scheduler.get_lr()[0], global_step=n_iter)
-            # self.writer.add_scalar('cosine_lr_decay_bert', scheduler_bert.get_lr()[0], global_step=n_iter)
 
     def _load_pre_trained_weights(self, model):
         try:
@@ -165,7 +163,7 @@ class SimCLR(object):
             valid_loss = 0.0
             counter = 0
             print(f'Validation step')
-            for xis, xls in valid_loader:
+            for xis, xls in tqdm(valid_loader):
 
                 xls = self.tokenizer(list(xls), return_tensors="pt", padding=True, truncation=self.truncation)
 

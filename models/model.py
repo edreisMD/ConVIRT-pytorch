@@ -88,9 +88,9 @@ class ModelCLR(nn.Module):
         """
         outputs = self.bert_model(**encoded_inputs)
         # Mean-Pooling para extrair as embeddings como no paper e no https://huggingface.co/sentence-transformers/bert-base-nli-max-tokens
-        sentence_embeddings = self.mean_pooling(outputs, encoded_inputs['attention_mask']).half()
         
         with torch.no_grad():
+            sentence_embeddings = self.mean_pooling(outputs, encoded_inputs['attention_mask']).half()
             x = self.bert_l1(sentence_embeddings)
             x = F.relu(x)
             out_emb = self.bert_l2(x)
