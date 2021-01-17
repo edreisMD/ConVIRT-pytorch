@@ -6,12 +6,14 @@ import numpy as np
 # import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
-from PIL import Image
+from PIL import Image, ImageFile
 import random
 import os
 import pickle
 import random
 import ast
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 # Ignore warnings

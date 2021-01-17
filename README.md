@@ -1,9 +1,9 @@
-# PyTorch ConVIRT
+# ConVIRT PyTorch 
+Pytorch implementation of the architecture descibed in the ConVIRT paper:
+### Contrastive Learning of Medical Visual Representations from Paired Images and Text
+Yuhao Zhang, Hang Jiang, Yasuhide Miura, Christopher D. Manning, Curtis P. Langlotz
 
-## Contrastive Learning of Medical Visual Representations from Paired Images and Text
-by Yuhao Zhang, Hang Jiang, Yasuhide Miura, Christopher D. Manning, Curtis P. Langlotz
-
-Non-official open source release prepared by Eduardo Reis.
+Non-official open source release by Eduardo Reis.
 
 Note: This repository was forked and modified from https://github.com/sthalles/SimCLR.
 
