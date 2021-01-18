@@ -16,7 +16,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
 import torch
-from transformers import AutoModel, BertTokenizer, BertModel, BertConfig, BertForPreTraining
+from transformers import AutoModel
 
 # Create the BertClassfier class
 class ModelCLR(nn.Module):
@@ -24,7 +24,7 @@ class ModelCLR(nn.Module):
         super(ModelCLR, self).__init__()
         #init BERT
         self.bert_model = self._get_bert_basemodel(bert_base_model,freeze_layers)
-        # projection MLP
+        # projection MLP for BERT model
         self.bert_l1 = nn.Linear(768, 768) #768 is the size of the BERT embbedings
         self.bert_l2 = nn.Linear(768, out_dim) #768 is the size of the BERT embbedings
 
@@ -34,7 +34,7 @@ class ModelCLR(nn.Module):
         resnet = self._get_res_basemodel(res_base_model)
         num_ftrs = resnet.fc.in_features
         self.res_features = nn.Sequential(*list(resnet.children())[:-1])
-        # projection MLP
+        # projection MLP for ResNet Model
         self.res_l1 = nn.Linear(num_ftrs, num_ftrs)
         self.res_l2 = nn.Linear(num_ftrs, out_dim)
 
@@ -59,9 +59,12 @@ class ModelCLR(nn.Module):
                     param.requires_grad = False
         return model
 
-    #Mean Pooling - Take attention mask into account for correct averaging
-    # Reference: https://www.sbert.net/docs/usage/computing_sentence_embeddings.html
+    
     def mean_pooling(self, model_output, attention_mask):
+        """
+        Mean Pooling - Take attention mask into account for correct averaging
+        Reference: https://www.sbert.net/docs/usage/computing_sentence_embeddings.html
+        """
         token_embeddings = model_output[0] #First element of model_output contains all token embeddings
         input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
         sum_embeddings = torch.sum(token_embeddings * input_mask_expanded, 1)
@@ -87,7 +90,6 @@ class ModelCLR(nn.Module):
         https://www.sbert.net
         """
         outputs = self.bert_model(**encoded_inputs)
-        # Mean-Pooling para extrair as embeddings como no paper e no https://huggingface.co/sentence-transformers/bert-base-nli-max-tokens
         
         with torch.no_grad():
             sentence_embeddings = self.mean_pooling(outputs, encoded_inputs['attention_mask']).half()

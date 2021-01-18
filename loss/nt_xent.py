@@ -1,5 +1,4 @@
 import torch
-import numpy as np
 import torch.nn.functional as F
 
 class NTXentLoss(torch.nn.Module):
@@ -11,49 +10,38 @@ class NTXentLoss(torch.nn.Module):
         self.alpha_weight = alpha_weight
         self.device = device
         self.softmax = torch.nn.Softmax(dim=-1)
-        self.mask_samples_from_same_repr = self._get_correlated_mask().type(torch.bool)
-        self.similarity_function = self._get_similarity_function(use_cosine_similarity)
         self.criterion = torch.nn.CrossEntropyLoss(reduction="sum")
 
     def softXEnt(self, target, logits):
+        """
+        From the pytorch discussion Forum:
+        https://discuss.pytorch.org/t/soft-cross-entropy-loss-tf-has-it-does-pytorch-have-it/69501 
+        """
         logprobs = torch.nn.functional.log_softmax(logits, dim = 1)
         loss = -(target * logprobs).sum() / logits.shape[0]
         return loss
 
-    def _get_similarity_function(self, use_cosine_similarity):
-        if use_cosine_similarity:
-            self._cosine_similarity = torch.nn.CosineSimilarity(dim=-1)
-            return self._cosine_simililarity
-        else:
-            return self._dot_simililarity
-
-    def _get_correlated_mask(self):
-        diag = np.eye(self.batch_size)
-        mask = torch.from_numpy((diag))
-        mask = (1 - mask).type(torch.bool)
-        return mask.to(self.device)
-
-    @staticmethod
-    def _dot_simililarity(x, y):
-        v = torch.tensordot(x.unsqueeze(1), y.T.unsqueeze(0), dims=2)
-        # x shape: (N, 1, C)
-        # y shape: (1, C, 2N)
-        # v shape: (N, 2N)
-        return v
-
-    def _cosine_simililarity(self, x, y):
-        # x shape: (N, 1, C)
-        # y shape: (1, 2N, C)
-        # v shape: (N, 2N)
-        v = self._cosine_similarity(x.unsqueeze(1), y.unsqueeze(0))
-        return v
-
     def forward(self, zis, zjs,
                     norm=True,
                     weights=1.0):
-
         temperature = self.temperature
         alpha = self.alpha_weight
+
+        """
+        Pytorch implementation of the loss  SimCRL function by googleresearch: https://github.com/google-research/simclr
+        @article{chen2020simple,
+                title={A Simple Framework for Contrastive Learning of Visual Representations},
+                author={Chen, Ting and Kornblith, Simon and Norouzi, Mohammad and Hinton, Geoffrey},
+                journal={arXiv preprint arXiv:2002.05709},
+                year={2020}
+                }
+        @article{chen2020big,
+                title={Big Self-Supervised Models are Strong Semi-Supervised Learners},
+                author={Chen, Ting and Kornblith, Simon and Swersky, Kevin and Norouzi, Mohammad and Hinton, Geoffrey},
+                journal={arXiv preprint arXiv:2006.10029},
+                year={2020}
+                }
+        """
 
         LARGE_NUM = 1e9
         """Compute loss for model.
@@ -82,45 +70,18 @@ class NTXentLoss(torch.nn.Module):
         labels = labels.to(self.device)
         masks = F.one_hot(torch.arange(start=0, end=batch_size, dtype=torch.int64), num_classes=batch_size)
         
-    #     logits_aa = torch.matmul(hidden1, torch.transpose(hidden1_large,0, 1)) / temperature
-    #     logits_aa = logits_aa - masks * LARGE_NUM
-    #     logits_bb = torch.matmul(hidden2,  torch.transpose(hidden2_large,0, 1)) / temperature
-    #     logits_bb = logits_bb - masks * LARGE_NUM
+        """
+        Different from Image-Image contrastive learning
+        In the case of Image-Text contrastive learning we do not compute the similarity function between the Image-Image and Text-Text pairs  
+        """
+        # logits_aa = torch.matmul(hidden1, torch.transpose(hidden1_large,0, 1)) / temperature
+        # logits_aa = logits_aa - masks * LARGE_NUM
+        # logits_bb = torch.matmul(hidden2,  torch.transpose(hidden2_large,0, 1)) / temperature
+        # logits_bb = logits_bb - masks * LARGE_NUM
         logits_ab = torch.matmul(hidden1, torch.transpose(hidden2_large,0, 1)) / temperature
         logits_ba = torch.matmul(hidden2, torch.transpose(hidden1_large,0, 1)) / temperature
 
-        loss_a = self.softXEnt(
-            labels, logits_ab)
-        # print(loss_a)
-        loss_b = self.softXEnt(
-            labels, logits_ba)
-        # print(loss_b)
+        loss_a = self.softXEnt(labels, logits_ab)
+        loss_b = self.softXEnt(labels, logits_ba)
 
-        # loss = alpha*loss_a + (1-alpha)*loss_b
-        loss = alpha*loss_a + (1-alpha)*loss_b
-        # print(loss)
-    
-        return loss
-
-        #Loss antiga
-        # # representations = torch.cat([zis, zjs], dim=0)
-        # similarity_matrix = self.similarity_function(zjs, zis)
-
-        # # filter out the scores from the positive samples
-        # l_pos = torch.diag(similarity_matrix, 0)
-        # # r_pos = torch.diag(similarity_matrix, -self.batch_size)
-        # # print(r_pos)
-        # positives = torch.cat([l_pos]).view(self.batch_size, 1)
-        # # print(self.mask_samples_from_same_repr)
-        # negatives = similarity_matrix[self.mask_samples_from_same_repr].view(self.batch_size, -1)
-
-        # logits = torch.cat((positives, negatives), dim=1)
-        # logits /= self.temperature
-
-        # labels = torch.zeros(self.batch_size).to(self.device).long()
-        # labels = torch.nn.functional.one_hot(torch.zeros(self.batch_size, dtype = torch.int64), 
-        #                                      num_classes=self.batch_size).to(self.device)
-        
-        # loss = self.softXEnt(logits, labels)
-
-        # return loss*2
+        return alpha*loss_a + (1-alpha)*loss_b

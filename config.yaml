@@ -11,17 +11,21 @@ truncation: True
 model:
   out_dim: 512
   res_base_model: "resnet50"
-  bert_base_model: 'emilyalsentzer/Bio_ClinicalBERT' #'sentence-transformers/paraphrase-xlm-r-multilingual-v1'
+  bert_base_model: 'emilyalsentzer/Bio_ClinicalBERT'
   freeze_layers: [0,1,2,3,4,5]
   do_lower_case: False
   
 dataset:
   s: 1
-  input_shape: (300,300,3)
+  input_shape: (224,224,3)
   num_workers: 4
   valid_size: 0.1
-  csv_file: '../data/creating_dataset/clr_dataset.csv' # Add the MIMIC-CXR path here 
-  img_root_dir: '../../../SSD/cont_learning_data/images' # 
+  csv_file: 'path/for/CSV_containing_MIMIC-CXR_paths_for_images_and_text.csv'
+  text_from_files: True # If 'True' the text input will be read from .txt files, if 'False' it will be loaded direct from the CSV File 
+  img_root_dir: '/your/root/images/directory'
+  text_root_dir: '/your/root/text/directory' # The root directory for the text files if "text_from_files" is True
+  img_path_col: 0 # index for the image path column in the CSV dataframe.
+  text_col: 5 # index for the text column in the CSV dataframe. If text_from_files is 'True' it should contain the relative path for the files from the 'text_root_dir', if text_from_files is 'False' this column should contain the respective input text in its own cells.
 
 loss:
   temperature: 0.1
@@ -29,13 +33,13 @@ loss:
   alpha_weight: 0.75
 
 ### BERT Models
-# emilyalsentzer/Bio_ClinicalBERT A melhor!!!
+# emilyalsentzer/Bio_ClinicalBERT
 # bert-base-uncased
-# neuralmind/bert-base-portuguese-cased
 # distilbert-base-nli-mean-tokens
 # distilbert-base-multilingual-cased
 # distiluse-base-multilingual-cased-v2
 # sentence-transformers/distilbert-base-nli-stsb-mean-tokens
-# sentence-transformers/xlm-r-100langs-bert-base-nli-stsb-mean-tokens funcionou bem
+# sentence-transformers/xlm-r-100langs-bert-base-nli-stsb-mean-tokens #good
 # cross-encoder/stsb-roberta-base
-# sentence-transformers/paraphrase-xlm-r-multilingual-v1 # Muito Boa!
+# sentence-transformers/paraphrase-xlm-r-multilingual-v1 #good
+# Portuguese: neuralmind/bert-base-portuguese-cased

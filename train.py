@@ -1,16 +1,17 @@
 import torch
+
 # from models.resnet_clr import ResNetSimCLR
 from models.model import ModelCLR
 from torch.utils.tensorboard import SummaryWriter
 import torch.nn.functional as F
 from loss.nt_xent import NTXentLoss
+import numpy as np
 import os
 import shutil
 import sys
 from tqdm import tqdm
 from transformers import AdamW
-import ast
-from transformers import BertTokenizer, AutoTokenizer
+from transformers import AutoTokenizer
 import logging
 logging.getLogger("transformers.tokenization_utils_base").setLevel(logging.ERROR)
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -27,19 +28,14 @@ except:
     print("Please install apex for mixed precision training from: https://github.com/NVIDIA/apex")
     apex_support = False
 
-import numpy as np
-
 torch.manual_seed(0)
-
 
 def _save_config_file(model_checkpoints_folder):
     if not os.path.exists(model_checkpoints_folder):
         os.makedirs(model_checkpoints_folder)
         shutil.copy('./config.yaml', os.path.join(model_checkpoints_folder, 'config.yaml'))
 
-
 class SimCLR(object):
-
     def __init__(self, dataset, config):
         self.config = config
         self.device = self._get_device()
@@ -66,11 +62,12 @@ class SimCLR(object):
                                         eval(self.config['learning_rate']), 
                                         weight_decay=eval(self.config['weight_decay']))
 
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0,
-                                                               last_epoch=-1)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 
+                                                                T_max=len(train_loader), 
+                                                                eta_min=0, 
+                                                                last_epoch=-1)
 
-        # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5,
-        #                                                             patience=5)
+        # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=5)
 
 
         if apex_support and self.config['fp16_precision']:
@@ -97,7 +94,10 @@ class SimCLR(object):
                 optimizer.zero_grad()
                 # optimizer_bert.zero_grad()
 
-                xls = self.tokenizer(list(xls), return_tensors="pt", padding=True, truncation=self.truncation)
+                xls = self.tokenizer(list(xls), 
+                                    return_tensors="pt", 
+                                    padding=True, 
+                                    truncation=self.truncation)
 
                 xis = xis.to(self.device)
                 xls = xls.to(self.device)
@@ -134,7 +134,6 @@ class SimCLR(object):
                     # save the model weights
                     best_valid_loss = valid_loss
                     torch.save(model.state_dict(), os.path.join(model_checkpoints_folder, 'model.pth'))
-                    # torch.save(model_bert.state_dict(), os.path.join(model_checkpoints_folder, 'model_bert.pth'))
                 self.writer.add_scalar('validation_loss', valid_loss, global_step=valid_n_iter)
                 valid_n_iter += 1
 
@@ -172,11 +171,6 @@ class SimCLR(object):
 
                 # get the representations and the projections
                 zis, zls = model(xis, xls)  # [N,C]
-
-                # get the representations and the projections
-                # zls = model_bert(xls)  # [N,C]
-                # zls = xls
-                # normalize projection feature vectors
 
                 loss = self.nt_xent_criterion(zis, zls)
 

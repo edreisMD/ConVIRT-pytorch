@@ -10,8 +10,19 @@ np.random.seed(0)
 
 
 class DataSetWrapper(object):
-
-    def __init__(self, batch_size, num_workers, valid_size, input_shape, s, csv_file, img_root_dir):
+    def __init__(self, 
+                batch_size, 
+                num_workers, 
+                valid_size, 
+                input_shape, 
+                s, 
+                csv_file, 
+                img_root_dir, 
+                img_path_col, 
+                text_col, 
+                text_from_files, 
+                text_root_dir):
+                
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.valid_size = valid_size
@@ -19,14 +30,23 @@ class DataSetWrapper(object):
         self.input_shape = eval(input_shape)
         self.csv_file = csv_file
         self.img_root_dir = img_root_dir
+        self.img_path_col = img_path_col 
+        self.text_col = text_col
+        self.text_from_files = text_from_files
+        self.text_root_dir = text_root_dir
+
         
     def get_data_loaders(self):
         data_augment = self._get_simclr_pipeline_transform()
         train_dataset = ClrDataset(csv_file=self.csv_file,
-                                           img_root_dir=self.img_root_dir,
-                                           transform=SimCLRDataTransform(data_augment),
-                                           input_shape = self.input_shape
-                                           )
+                                    img_root_dir=self.img_root_dir,
+                                    input_shape = self.input_shape,
+                                    img_path_col = self.img_path_col, 
+                                    text_col = self.text_col, 
+                                    text_from_files = self.text_from_files, 
+                                    text_root_dir = self.text_root_dir, 
+                                    transform=SimCLRDataTransform(data_augment)
+                                    )
 
         # train_dataset = datasets.STL10('./data', split='train+unlabeled', download=True,
         #                                transform=SimCLRDataTransform(data_augment))
