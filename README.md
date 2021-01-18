@@ -1,4 +1,5 @@
-# ConVIRT PyTorch 
+# Contrastive Learning for Text and Images
+# ConVIRT Pytorch
 Pytorch implementation of the architecture descibed in the ConVIRT paper:
 ### Contrastive Learning of Medical Visual Representations from Paired Images and Text
 Yuhao Zhang, Hang Jiang, Yasuhide Miura, Christopher D. Manning, Curtis P. Langlotz
