@@ -9,7 +9,7 @@ Note: This repository was forked and modified from https://github.com/sthalles/S
 
 References: 
 - Yuhao Zhang et al. Contrastive Learning of Medical Visual Representations from Paired Images and Text. https://arxiv.org/pdf/2010.00747.pdf
-- Ting Chen et al. A Simple Framework for Contrastive Learning of Visual Representations
+- Ting Chen et al. A Simple Framework for Contrastive Learning of Visual Representations. https://arxiv.org/abs/2002.05709
 - https://github.com/sthalles/SimCLR
 - https://github.com/google-research/simclr
 - https://github.com/google-research/bert
