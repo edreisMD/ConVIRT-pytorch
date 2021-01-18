@@ -2,6 +2,6 @@
 /runs
 /apex
 /.vscode
-# /dataloader/__pycache__
-# /loss/__pycache__
-# /models/__pycache__
+/dataloader/__pycache__
+/loss/__pycache__
+/models/__pycache__
