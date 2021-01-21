@@ -1,4 +1,4 @@
-from train_clr import SimCLR
+from train import SimCLR
 import yaml
 from dataloader.dataset_wrapper import DataSetWrapper
 
