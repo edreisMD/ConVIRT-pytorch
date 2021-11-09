@@ -20,9 +20,9 @@ dataset:
   input_shape: (224,224,3)
   num_workers: 4
   valid_size: 0.1
-  csv_file: 'path/for/CSV_containing_MIMIC-CXR_paths_for_images_and_text.csv'
-  text_from_files: True # If 'True' the text input will be read from .txt files, if 'False' it will be loaded direct from the CSV File 
-  img_root_dir: '/your/root/images/directory'
+  csv_file: '../input/chexpert/train.csv'
+  text_from_files: False # If 'True' the text input will be read from .txt files, if 'False' it will be loaded direct from the CSV File 
+  img_root_dir: '../input/chexpert/train'
   text_root_dir: '/your/root/text/directory' # The root directory for the text files if "text_from_files" is True
   img_path_col: 0 # index for the image path column in the CSV dataframe.
   text_col: 5 # index for the text column in the CSV dataframe. If text_from_files is 'True' it should contain the relative path for the files from the 'text_root_dir', if text_from_files is 'False' this column should contain the respective input text in its own cells.

@@ -3,7 +3,7 @@ import yaml
 from dataloader.dataset_wrapper import DataSetWrapper
 
 def main():
-    config = yaml.load(open("config.yaml", "r"), Loader=yaml.FullLoader)
+    config = yaml.load(open("./ConVIRT-pytorch/config.yaml", "r"), Loader=yaml.FullLoader)
     
     dataset = DataSetWrapper(config['batch_size'], **config['dataset'])
 
